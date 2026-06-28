@@ -20,6 +20,18 @@ metrics = {
     "errors": 0
 }
 
+def get_risk_classification_prompt(narrative: str) -> str:
+    return f"""Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
+
+### Instruction:
+You are an expert financial compliance officer. Analyze the following risk narrative and extract the 'Risk Category', a brief 'Risk Summary', and the 'Severity'. Return the output as structured JSON.
+
+### Input:
+{narrative}
+
+### Response:
+"""
+
 # Define request/response models
 class QueryRequest(BaseModel):
     narrative: str
@@ -60,7 +72,6 @@ def load_hf_model():
             logger.error(f"Failed to load HF model: {e}")
 
 def run_hf_inference(prompt: str) -> str:
-    from prompts import get_risk_classification_prompt
     full_prompt = get_risk_classification_prompt(prompt)
     inputs = hf_tokenizer(full_prompt, return_tensors="pt").to(hf_model.device)
     
@@ -73,7 +84,6 @@ def run_hf_inference(prompt: str) -> str:
 def run_ollama_inference(prompt: str) -> str:
     """Fallback to local Ollama for Mac users running Llama 3 locally."""
     import requests
-    from prompts import get_risk_classification_prompt
     
     full_prompt = get_risk_classification_prompt(prompt)
     
